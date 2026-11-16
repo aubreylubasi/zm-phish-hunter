@@ -2,13 +2,13 @@ name: ZM Phish Hunter
 
 on:
   schedule:
-    - cron: "17 */3 * * *"   # every 3 hours
+    - cron: "17 */6 * * *"   # every 6 hours
   workflow_dispatch:
     inputs:
       mode:
         description: "What to do"
         type: choice
-        options: [hunt, dry-run, check, probe]
+        options: [hunt, dry-run, check]
         default: hunt
 
 permissions:
@@ -37,12 +37,11 @@ jobs:
         run: |
           case "${{ github.event.inputs.mode }}" in
             check)   python hunter.py --check ;;
-            probe)   python hunter.py --probe zanaco ;;
             dry-run) python hunter.py --dry-run ;;
             *)       python hunter.py ;;
           esac
       - name: Save findings
-        if: github.event.inputs.mode != 'check' && github.event.inputs.mode != 'probe' && github.event.inputs.mode != 'dry-run'
+        if: github.event.inputs.mode != 'check' && github.event.inputs.mode != 'dry-run'
         run: |
           git config user.name "zm-phish-hunter"
           git config user.email "actions@users.noreply.github.com"

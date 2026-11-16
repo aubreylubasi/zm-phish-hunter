@@ -1,28 +1,33 @@
 # ZM Phish Hunter settings. Edit this file to add brands or change how strict it is.
 
 [settings]
-# How far back to look. The first run looks further so the report isn't empty.
-lookback_days = 3
-first_run_lookback_days = 30
-
 # Scores: 70+ is "high" (sent as an alert), 50+ is "medium" (report only), below that is ignored.
 high_score = 70
 medium_score = 50
 
-# crt.sh is a free public service and is often slow: be patient and polite.
-search_timeout = 90
-search_retries = 3
-seconds_between_searches = 8
+# Endings to try for every name.
+try_endings = ["com", "net", "org", "co", "info", "online", "top", "xyz", "shop", "site", "live",
+               "app", "store", "click", "vip", "co.zm", "com.zm", "zm"]
 
-# Check whether the top findings are online (a DNS lookup only - the site is never visited).
-max_online_checks = 25
+# Words to try before and after every name (zanaco-login, secure-zanaco…).
+try_lure_words = ["login", "online", "secure", "verify", "update", "bonus", "promo", "rewards",
+                  "support", "pay", "wallet", "money", "momo", "loans", "app", "portal"]
+
+# How many DNS lookups to run at the same time.
+dns_workers = 40
+
+# A site whose first certificate is this recent gets +10 (new sites are more suspicious).
+fresh_days = 30
+
+# crt.sh (certificate lookups) is a free public service and is often slow: be patient and polite.
+search_timeout = 90
+search_retries = 2
+seconds_between_searches = 6
+max_certificate_lookups = 25
 
 # Real websites that use a brand's name but aren't scams (a football club, a supplier…).
 # Add a name here when the report keeps flagging something you have checked is genuine.
 ignore_domains = ["zescounited.co.zm", "zescounitedfc.co.zm"]
-
-# Extra searches that aren't tied to one brand.
-extra_searches = ["zambia"]
 
 # Words that show a name is aimed at Zambia. Brands marked needs_zambia_context
 # (used in many countries) only count when one of these, or a .zm ending, is present.
@@ -46,7 +51,6 @@ risky_endings = ["top", "xyz", "shop", "online", "site", "click", "live", "icu",
 #  - names:            spellings to look for inside new domain names
 #  - official_domains: the real websites (never reported).  CHECK THESE - a wrong
 #                      entry here means the real site gets reported as fake.
-#  - search:           what to ask the certificate logs for
 #  - needs_zambia_context: true for names used in many countries (MTN, Absa…)
 # ─────────────────────────────────────────────────────────────
 
@@ -54,77 +58,65 @@ risky_endings = ["top", "xyz", "shop", "online", "site", "click", "live", "icu",
 label = "Zanaco"
 names = ["zanaco"]
 official_domains = ["zanaco.co.zm"]
-search = ["zanaco"]
 
 [[brands]]
 label = "ZESCO"
 names = ["zesco"]
 official_domains = ["zesco.co.zm"]
-search = ["zesco"]
 
 [[brands]]
 label = "Zamtel"
 names = ["zamtel", "zamtelmoney", "zamtelkwacha"]
 official_domains = ["zamtel.zm", "zamtel.co.zm"]
-search = ["zamtel"]
 
 [[brands]]
 label = "Zambia Revenue Authority"
 names = ["zra", "zraonline", "zambiarevenue"]
 official_domains = ["zra.org.zm"]
-search = ["zra-", "-zra", "zraonline", "zambiarevenue"]
 
 [[brands]]
 label = "NAPSA"
 names = ["napsa", "enapsa"]
 official_domains = ["napsa.co.zm"]
-search = ["napsa"]
 
 [[brands]]
 label = "Bank of Zambia"
 names = ["bankofzambia", "boz"]
 official_domains = ["boz.zm"]
-search = ["bankofzambia"]
 needs_zambia_context = true
 
 [[brands]]
 label = "Indo Zambia Bank"
 names = ["indozambia", "izb"]
 official_domains = ["izb.co.zm"]
-search = ["indozambia"]
 needs_zambia_context = true
 
 [[brands]]
 label = "Airtel Money"
 names = ["airtel", "airtelmoney"]
 official_domains = ["airtel.co.zm", "airtel.africa", "airtel.com", "airtel.in"]
-search = ["airtelzm", "airtel-zm", "airtelzambia"]
 needs_zambia_context = true
 
 [[brands]]
 label = "MTN MoMo"
 names = ["mtn", "mtnmomo", "momo"]
 official_domains = ["mtn.zm", "mtn.co.zm", "mtn.com"]
-search = ["mtnzm", "mtn-zm", "mtnzambia"]
 needs_zambia_context = true
 
 [[brands]]
 label = "Absa Zambia"
 names = ["absa"]
 official_domains = ["absa.co.zm", "absa.africa", "absa.co.za"]
-search = ["absazambia", "absa-zm", "absazm"]
 needs_zambia_context = true
 
 [[brands]]
 label = "FNB Zambia"
 names = ["fnb", "fnbzambia"]
 official_domains = ["fnbzambia.co.zm", "fnb.co.zm", "fnb.co.za"]
-search = ["fnbzambia", "fnb-zm", "fnbzm"]
 needs_zambia_context = true
 
 [[brands]]
 label = "Stanbic Zambia"
 names = ["stanbic", "stanbicbank"]
 official_domains = ["stanbicbank.co.zm", "stanbicbank.com", "standardbank.com"]
-search = ["stanbiczambia", "stanbic-zm", "stanbiczm"]
 needs_zambia_context = true

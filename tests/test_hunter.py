@@ -1,5 +1,4 @@
 """Offline tests: no internet needed.    python tests/test_hunter.py"""
-import json
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -37,26 +36,34 @@ for d in SHOULD_IGNORE:
     ok &= good
     print(f"{'ok  ' if good else 'FAIL'} ignore {d}: {got}")
 
-# Full run from a saved crt.sh-style file, in a temporary folder.
+# Candidate names: the fakes we expect to try are generated, the real site is not.
+names = set().union(*(hunter.candidates_for(b, cfg) for b in cfg["brands"]))
+for d in ["zanaco-login.top", "zanac0.com", "zannaco.com", "zesco-bonus.shop", "mtnzambia.com", "airtel-zambia-promo.online"]:
+    good = d in names
+    ok &= good
+    print(f"{'ok  ' if good else 'FAIL'} would try {d}")
+for d in ["zanaco.co.zm", "mtn.zm", "mtn-login.com"]:
+    good = d not in names
+    ok &= good
+    print(f"{'ok  ' if good else 'FAIL'} would not try {d}")
+
+# Full run with pretend DNS and certificate answers, in a temporary folder.
 now = datetime.now(timezone.utc)
-rows = [
-    {"common_name": "zanaco-login.top", "name_value": "zanaco-login.top\nwww.zanaco-login.top",
-     "entry_timestamp": (now - timedelta(hours=5)).isoformat(), "issuer_name": "C=US, O=Let's Encrypt, CN=R11"},
-    {"common_name": "*.zanaco.co.zm", "name_value": "*.zanaco.co.zm\nzanaco.co.zm",
-     "entry_timestamp": (now - timedelta(hours=2)).isoformat(), "issuer_name": "C=US, O=DigiCert Inc"},
-    {"common_name": "old-zesco-bonus.xyz", "name_value": "old-zesco-bonus.xyz",
-     "entry_timestamp": (now - timedelta(days=200)).isoformat(), "issuer_name": ""},
-]
+PRETEND_EXISTS = {"zanaco-login.top", "zannaco.com", "zesco.com"}
 with tempfile.TemporaryDirectory() as tmp:
     tmp = Path(tmp)
     hunter.STATE_FILE, hunter.REPORT_FILE, hunter.HISTORY_FILE = tmp / "seen.json", tmp / "latest.md", tmp / "all.json"
-    (tmp / "rows.json").write_text(json.dumps(rows))
-    hunter.resolves = lambda d: False
-    first = hunter.hunt(cfg, rows_file=tmp / "rows.json")
-    second = hunter.hunt(cfg, rows_file=tmp / "rows.json")
+    hunter.lookup = lambda d: d in PRETEND_EXISTS
+    hunter.certificate_info = lambda d, c: ({"logged": (now - timedelta(days=2)).isoformat(), "issuer": "Let's Encrypt",
+                                             "certificates": 1} if d == "zanaco-login.top" else {})
+    cfg["seconds_between_searches"] = 0
+    first = hunter.hunt(cfg)
+    second = hunter.hunt(cfg)
     report = hunter.REPORT_FILE.read_text()
+    top = first[0] if first else {}
     checks = {
-        "one finding (www and bare name merged, official and old skipped)": [f["domain"] for f in first] in (["zanaco-login.top"], ["www.zanaco-login.top"]),
+        "finds the three pretend sites": {f["domain"] for f in first} == PRETEND_EXISTS,
+        "the newly set up site scores highest": top.get("domain") == "zanaco-login.top" and "set up in the last" in " ".join(top.get("reasons", [])),
         "second run reports nothing new": second == [],
         "report hides clickable links": "zanaco-login[.]top" in report and "zanaco-login.top" not in report,
     }

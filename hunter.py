@@ -1,19 +1,26 @@
-"""ZM Phish Hunter - finds new websites that pretend to be Zambian banks,
+"""ZM Phish Hunter - finds websites that pretend to be Zambian banks,
 mobile money services and public bodies.
 
-Every new HTTPS website needs a certificate, and every certificate is written
-to public logs. This bot searches those logs (through crt.sh) for new domain
-names that look like a Zambian brand, scores how suspicious each one is, and
-writes a report. It is passive: it never visits or scans the websites.
+How it works:
+  1. For every brand in config.toml it builds the names a scammer would likely
+     register: misspellings (zannaco, zanac0), added lure words (zanaco-login)
+     and cheap endings (.top, .xyz).
+  2. It asks DNS which of those names exist.
+  3. For new ones it looks up the certificate in the public Certificate
+     Transparency logs (crt.sh) to see when the site was set up.
+  4. It scores each name and writes a report.
+It is passive: it never visits or scans the websites.
 
-    python hunter.py                 # normal run: search, score, write the report
+    python hunter.py                 # normal run: generate, check, score, write the report
     python hunter.py --dry-run       # same, but save nothing and send no alerts
-    python hunter.py --check         # test that each search works
+    python hunter.py --check         # test DNS and the certificate lookup
     python hunter.py --score zanaco-login.top mtn.zm   # score names by hand
+    python hunter.py --candidates zanaco               # show the names it would try for a brand
 
 Settings and the list of brands are in config.toml.
 """
 import argparse
+import itertools
 import json
 import os
 import re
@@ -21,6 +28,8 @@ import socket
 import sys
 import time
 import tomllib
+import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -191,25 +200,79 @@ def score_domain(domain, cfg):
     return {"domain": domain, "brand": brand["label"], "score": score, "level": level, "reasons": reasons}
 
 
-# ───────────────────────────── certificate search ─────────────────────────────
+# ───────────────────────────── candidate names ─────────────────────────────
 
-def search_crtsh(term, cfg):
-    """All unexpired certificates whose names contain `term`. Returns a list of crt.sh rows."""
-    import requests
-    url = "https://crt.sh/"
-    params = {"q": f"%{term}%", "output": "json", "exclude": "expired", "deduplicate": "Y"}
-    last = None
-    for attempt in range(1, cfg["search_retries"] + 1):
-        try:
-            r = requests.get(url, params=params, timeout=cfg["search_timeout"], headers={"User-Agent": USER_AGENT})
-            if r.status_code == 200:
-                return r.json() if r.text.strip() else []
-            last = f"HTTP {r.status_code}"
-        except Exception as e:  # noqa: BLE001 - crt.sh is often slow; try again
-            last = type(e).__name__
-        time.sleep(5 * attempt)
-    raise RuntimeError(f"crt.sh did not answer for '{term}' ({last})")
+SWAPS = {"o": "0", "l": "1", "i": "1", "e": "3", "a": "4", "s": "5"}
 
+
+def misspellings(name):
+    """Common ways to fake a name: drop, double or swap a letter, or use a digit that looks like one."""
+    out = set()
+    for i in range(len(name)):
+        out.add(name[:i] + name[i + 1:])                      # zanco
+        out.add(name[:i] + name[i] * 2 + name[i + 1:])        # zannaco
+        if name[i] in SWAPS:
+            out.add(name[:i] + SWAPS[name[i]] + name[i + 1:])  # zanac0
+        if i + 1 < len(name) and name[i] != name[i + 1]:
+            out.add(name[:i] + name[i + 1] + name[i] + name[i + 2:])  # zanaoc
+    out.discard(name)
+    return {n for n in out if len(n) >= 4 and n[0].isalpha()}
+
+
+def candidates_for(brand, cfg):
+    """Every name the bot will try for one brand (without checking if it exists)."""
+    endings, lures = cfg["try_endings"], cfg["try_lure_words"]
+    main = brand["names"][0]          # lure words and misspellings are only tried on the main name
+    bases, lure_bases = set(), set()
+    for name in brand["names"]:
+        if brand.get("needs_zambia_context"):
+            # MTN, Absa…: only the Zambian forms, e.g. mtnzambia, mtn-zm, zambia-mtn
+            for z in ("zambia", "zm"):
+                bases |= {name + z, f"{name}-{z}", z + name, f"{z}-{name}"}
+            if name == main:
+                lure_bases |= {name + "zambia", f"{name}-zambia"}
+        elif len(name) >= 4 or name == main:
+            bases.add(name)
+            if name == main:
+                lure_bases.add(name)
+    stems = set(bases)
+    for base in lure_bases:
+        if len(base) >= 5 and not brand.get("needs_zambia_context"):
+            stems |= misspellings(base)
+        for lure, sep in itertools.product(lures, ("", "-")):
+            stems |= {f"{base}{sep}{lure}", f"{lure}{sep}{base}"}
+    official = set(brand["official_domains"]) | set(cfg.get("ignore_domains", []))
+    return {f"{stem}.{end}" for stem in stems for end in endings} - official
+
+
+def lookup(domain):
+    try:
+        socket.getaddrinfo(domain, 443, type=socket.SOCK_STREAM)
+        return True
+    except OSError:
+        return False
+
+
+resolves = lookup  # kept under both names so tests can swap either
+
+
+def wildcard_endings(endings):
+    """Endings where every name 'exists' (the registry answers for anything). These are skipped."""
+    bad = set()
+    for end in endings:
+        if lookup(f"zmph-{uuid.uuid4().hex[:16]}.{end}"):
+            bad.add(end)
+    return bad
+
+
+def find_existing(names, workers):
+    socket.setdefaulttimeout(6)
+    names = sorted(names)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return {n for n, ok in zip(names, pool.map(lookup, names)) if ok}
+
+
+# ───────────────────────────── certificate lookup ─────────────────────────────
 
 def parse_time(text):
     try:
@@ -219,30 +282,28 @@ def parse_time(text):
         return None
 
 
-def domains_from_rows(rows, since):
-    """{domain: {first_logged, issuer}} for certificates logged after `since`."""
-    out = {}
-    for row in rows:
-        logged = parse_time(row.get("entry_timestamp") or row.get("not_before") or "")
-        if since and logged and logged < since:
-            continue
-        names = f"{row.get('common_name') or ''}\n{row.get('name_value') or ''}".split("\n")
-        issuer = re.search(r"O=([^,]+)", row.get("issuer_name") or "")
-        for raw in names:
-            d = clean_domain(raw)
-            if d and (d not in out or (logged and out[d]["logged"] and logged < parse_time(out[d]["logged"]))):
-                out[d] = {"logged": logged.isoformat() if logged else None,
-                          "issuer": issuer.group(1).strip('"') if issuer else ""}
-    return out
-
-
-def resolves(domain):
-    try:
-        socket.setdefaulttimeout(5)
-        socket.getaddrinfo(domain, 443)
-        return True
-    except OSError:
-        return False
+def certificate_info(domain, cfg):
+    """When the first certificate for this exact name was logged, and by whom. {} if unknown.
+    (An exact-name lookup on crt.sh is reliable; its 'contains' search is not.)"""
+    import requests
+    for attempt in range(1, cfg["search_retries"] + 1):
+        try:
+            r = requests.get("https://crt.sh/", params={"q": domain, "output": "json"},
+                             timeout=cfg["search_timeout"], headers={"User-Agent": USER_AGENT})
+            if r.status_code == 200 and r.text.strip().startswith("["):
+                rows = r.json()
+                times = [(parse_time(x.get("entry_timestamp") or ""), x) for x in rows]
+                times = [(t, x) for t, x in times if t]
+                if not times:
+                    return {"certificates": 0}
+                first, row = min(times, key=lambda p: p[0])
+                issuer = re.search(r"O=([^,]+)", row.get("issuer_name") or "")
+                return {"logged": first.isoformat(), "certificates": len(rows),
+                        "issuer": issuer.group(1).strip('"') if issuer else ""}
+        except Exception:  # noqa: BLE001 - crt.sh is often slow; try again
+            pass
+        time.sleep(5 * attempt)
+    return {}
 
 
 # ───────────────────────────── state, report, alerts ─────────────────────────────
@@ -287,13 +348,13 @@ def write_report(new, history, failed, now):
     if not new:
         lines += ["Nothing new.", ""]
     for f in new:
-        live = "online" if f.get("online") else "not online yet" if f.get("online") is False else "not checked"
+        live = "exists in DNS"
         lines += [f"### {defang(f['domain'])}",
                   f"- **May imitate:** {f['brand']}",
                   f"- **Score:** {f['score']}/100 ({f['level']})",
                   f"- **Why:** {'; '.join(f['reasons'])}",
-                  f"- **Certificate logged:** {(f.get('logged') or 'unknown')[:16].replace('T', ' ')} UTC"
-                  + (f", issued by {f['issuer']}" if f.get("issuer") else ""),
+                  "- **First certificate:** " + (f"{f['logged'][:10]}" + (f", issued by {f['issuer']}" if f.get("issuer") else "")
+                                                 if f.get("logged") else "none found / not looked up"),
                   f"- **Status:** {live}", ""]
     recent = sorted(history.values(), key=lambda f: f.get("found") or "", reverse=True)[:50]
     lines += ["## Last 50 findings", "", "| Found | Domain | May imitate | Score |", "|---|---|---|---|"]
@@ -320,62 +381,53 @@ def send_telegram(findings):
 
 # ───────────────────────────── main ─────────────────────────────
 
-def hunt(cfg, dry_run=False, rows_file=None):
+def hunt(cfg, dry_run=False):
     now = datetime.now(timezone.utc)
-    state = load_json(STATE_FILE, {"first_run_done": False, "seen": {}})
+    state = load_json(STATE_FILE, {"seen": {}})
     history = load_json(HISTORY_FILE, {})
-    days = cfg["lookback_days"] if state["first_run_done"] else cfg["first_run_lookback_days"]
-    since = now - timedelta(days=days)
-    log(f"Looking for certificates logged in the last {days} day(s)")
 
-    found, failed = {}, []
-    if rows_file:
-        found = domains_from_rows(json.loads(Path(rows_file).read_text(encoding="utf-8")), since)
-    else:
-        terms = sorted({t.lower() for b in cfg["brands"] for t in b.get("search", [])} | set(cfg["extra_searches"]))
-        for i, term in enumerate(terms):
-            if i:
-                time.sleep(cfg["seconds_between_searches"])  # be polite to crt.sh
-            try:
-                rows = search_crtsh(term, cfg)
-            except RuntimeError as e:
-                log(f"❌ {e}")
-                failed.append(term)
-                continue
-            got = domains_from_rows(rows, since)
-            log(f"✅ '{term}': {len(rows)} certificates, {len(got)} recent names")
-            for d, info in got.items():
-                found.setdefault(d, info)
+    names = set()
+    for brand in cfg["brands"]:
+        got = candidates_for(brand, cfg)
+        log(f"{brand['label']}: {len(got)} names to try")
+        names |= got
+    bad = wildcard_endings(cfg["try_endings"])
+    if bad:
+        log(f"Skipping endings that answer for every name: {', '.join(sorted(bad))}")
+        names = {n for n in names if n.rsplit(".", 1)[-1] not in bad and not any(n.endswith("." + b) for b in bad)}
+    log(f"Checking which of {len(names)} names exist…")
+    existing = find_existing(names, cfg["dns_workers"])
+    log(f"{len(existing)} exist")
 
     new = []
-    for domain, info in sorted(found.items()):
+    for domain in sorted(existing):
         if domain in state["seen"]:
             continue
         state["seen"][domain] = now.isoformat()
         f = score_domain(domain, cfg)
         if not f or f["level"] == "low":
             continue
-        f.update(info, found=now.isoformat())
+        f.update(found=now.isoformat(), online=True)
         new.append(f)
-    # One entry per registered name: keep the highest score (www.x and x are the same site).
-    by_reg = {}
-    for f in new:
-        key = registered_domain(f["domain"])
-        if key not in by_reg or f["score"] > by_reg[key]["score"]:
-            by_reg[key] = f
-    new = sorted(by_reg.values(), key=lambda f: -f["score"])
-    for f in new[: cfg["max_online_checks"]]:
-        f["online"] = resolves(f["domain"])
+    new.sort(key=lambda f: -f["score"])
+    for i, f in enumerate(new[: cfg["max_certificate_lookups"]]):
+        if i:
+            time.sleep(cfg["seconds_between_searches"])  # be polite to crt.sh
+        f.update(certificate_info(f["domain"], cfg))
+        if f.get("logged") and now - parse_time(f["logged"]) <= timedelta(days=cfg["fresh_days"]):
+            f["score"] = min(f["score"] + 10, 100)
+            f["reasons"].append(f"set up in the last {cfg['fresh_days']} days")
+            f["level"] = "high" if f["score"] >= cfg["high_score"] else f["level"]
+    new.sort(key=lambda f: -f["score"])
 
-    log(f"\n{len(found)} names checked, {len(new)} new finding(s)")
+    log(f"\n{len(new)} new finding(s)")
     for f in new:
         log(f"  {f['score']:3d} {f['level']:6} {defang(f['domain'])}  -> {f['brand']}: {'; '.join(f['reasons'])}")
     if dry_run:
         return new
     for f in new:
         history[f["domain"]] = f
-    state["first_run_done"] = state["first_run_done"] or not failed or bool(found)
-    write_report(new, history, failed, now)
+    write_report(new, history, [], now)
     save_json(STATE_FILE, state)
     save_json(HISTORY_FILE, history)
     send_telegram([f for f in new if f["level"] == "high"])
@@ -385,10 +437,9 @@ def hunt(cfg, dry_run=False, rows_file=None):
 def main():
     ap = argparse.ArgumentParser(description="Find new websites that imitate Zambian brands.")
     ap.add_argument("--dry-run", action="store_true", help="search and score, but save nothing")
-    ap.add_argument("--check", action="store_true", help="test each certificate search")
+    ap.add_argument("--check", action="store_true", help="test DNS and the certificate lookup")
     ap.add_argument("--score", nargs="+", metavar="DOMAIN", help="score these names and exit")
-    ap.add_argument("--probe", metavar="TERM", help="show the raw crt.sh answers for one term (for debugging)")
-    ap.add_argument("--rows", help="read crt.sh rows from a JSON file instead of the internet (for testing)")
+    ap.add_argument("--candidates", metavar="BRAND", help="list the names it would try for a brand and exit")
     args = ap.parse_args()
     cfg = load_config()
 
@@ -403,31 +454,26 @@ def main():
             else:
                 print(f"{d}: {f['score']}/100 ({f['level']}) - may imitate {f['brand']}: {'; '.join(f['reasons'])}")
         return
-    if args.probe:
-        import requests
-        for q, extra in [(f"%{args.probe}%", {"exclude": "expired", "deduplicate": "Y"}), (f"%{args.probe}%", {}),
-                         (f"%.{args.probe}.co.zm", {}), (f"{args.probe}.co.zm", {})]:
-            try:
-                r = requests.get("https://crt.sh/", params={"q": q, "output": "json", **extra}, timeout=120,
-                                 headers={"User-Agent": USER_AGENT})
-                body = r.text.strip()
-                n = len(r.json()) if body.startswith("[") else "not JSON"
-                print(f"q={q} {extra}: HTTP {r.status_code}, {len(r.content)} bytes, rows={n}, starts {body[:80]!r}")
-            except Exception as e:  # noqa: BLE001
-                print(f"q={q} {extra}: {type(e).__name__}: {e}")
-            time.sleep(6)
+    if args.candidates:
+        for brand in cfg["brands"]:
+            if args.candidates.lower() in brand["label"].lower():
+                names = sorted(candidates_for(brand, cfg))
+                print(f"{brand['label']}: {len(names)} names")
+                print("\n".join(names))
         return
     if args.check:
         ok = True
-        for term in sorted({t for b in cfg["brands"] for t in b.get("search", [])} | set(cfg["extra_searches"])):
-            try:
-                print(f"✅ {term}: {len(search_crtsh(term, cfg))} certificates")
-            except RuntimeError as e:
-                ok = False
-                print(f"❌ {e}")
-            time.sleep(cfg["seconds_between_searches"])
+        bad = wildcard_endings(cfg["try_endings"])
+        print(f"Endings that answer for every name (skipped): {', '.join(sorted(bad)) or 'none'}")
+        for d in ["zanaco.co.zm", "zesco.co.zm", "github.com"]:
+            good = lookup(d)
+            ok &= good
+            print(f"{'✅' if good else '❌'} DNS finds the real site {d}")
+        info = certificate_info("zanaco.co.zm", cfg)
+        ok &= bool(info.get("certificates"))
+        print(f"{'✅' if info.get('certificates') else '❌'} certificate lookup: {info or 'no answer from crt.sh'}")
         sys.exit(0 if ok else 1)
-    hunt(cfg, dry_run=args.dry_run, rows_file=args.rows)
+    hunt(cfg, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
