@@ -304,6 +304,19 @@
   ],
   "score": 55
  },
+ "zesco.online": {
+  "brand": "ZESCO",
+  "domain": "zesco.online",
+  "found": "2026-11-16T19:03:31.227656+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "cheap ending .online",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
  "zesco.xyz": {
   "brand": "ZESCO",
   "domain": "zesco.xyz",
