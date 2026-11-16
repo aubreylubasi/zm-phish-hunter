@@ -1,0 +1,429 @@
+{
+ "airtelzambia.com": {
+  "brand": "Airtel Money",
+  "domain": "airtelzambia.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"airtel\" (Airtel Money)"
+  ],
+  "score": 50
+ },
+ "boz-zm.org": {
+  "brand": "Bank of Zambia",
+  "domain": "boz-zm.org",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"boz\" (Bank of Zambia)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "fnbzambia.com": {
+  "brand": "FNB Zambia",
+  "domain": "fnbzambia.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"fnbzambia\" (FNB Zambia)"
+  ],
+  "score": 50
+ },
+ "fnbzambia.top": {
+  "brand": "FNB Zambia",
+  "domain": "fnbzambia.top",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"fnbzambia\" (FNB Zambia)",
+   "cheap ending .top"
+  ],
+  "score": 60
+ },
+ "naps4.com": {
+  "brand": "NAPSA",
+  "domain": "naps4.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "the name is one letter off, or uses digits for letters",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "napsa.co": {
+  "brand": "NAPSA",
+  "domain": "napsa.co",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsa.com": {
+  "brand": "NAPSA",
+  "domain": "napsa.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsa.live": {
+  "brand": "NAPSA",
+  "domain": "napsa.live",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "cheap ending .live",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "napsa.net": {
+  "brand": "NAPSA",
+  "domain": "napsa.net",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsa.online": {
+  "brand": "NAPSA",
+  "domain": "napsa.online",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "cheap ending .online",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "napsa.org": {
+  "brand": "NAPSA",
+  "domain": "napsa.org",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsaa.com": {
+  "brand": "NAPSA",
+  "domain": "napsaa.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsaa.org": {
+  "brand": "NAPSA",
+  "domain": "napsaa.org",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "napsaonline.com": {
+  "brand": "NAPSA",
+  "domain": "napsaonline.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "high",
+  "online": true,
+  "reasons": [
+   "uses the name \"napsa\" (NAPSA)",
+   "lure words: online",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 70
+ },
+ "zaanco.com": {
+  "brand": "Zanaco",
+  "domain": "zaanco.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "the name is one letter off, or uses digits for letters",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zamtel.com": {
+  "brand": "Zamtel",
+  "domain": "zamtel.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zamtel\" (Zamtel)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zamtelkwacha.co.zm": {
+  "brand": "Zamtel",
+  "domain": "zamtelkwacha.co.zm",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zamtel\" (Zamtel)"
+  ],
+  "score": 50
+ },
+ "zanacco.com": {
+  "brand": "Zanaco",
+  "domain": "zanacco.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "the name is one letter off, or uses digits for letters",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zanaco.com": {
+  "brand": "Zanaco",
+  "domain": "zanaco.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zanaco.org": {
+  "brand": "Zanaco",
+  "domain": "zanaco.org",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zancao.com": {
+  "brand": "Zanaco",
+  "domain": "zancao.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "the name is one letter off, or uses digits for letters",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zannaco.com": {
+  "brand": "Zanaco",
+  "domain": "zannaco.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zanaco\" (Zanaco)",
+   "the name is one letter off, or uses digits for letters",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zesco.co": {
+  "brand": "ZESCO",
+  "domain": "zesco.co",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zesco.com": {
+  "brand": "ZESCO",
+  "domain": "zesco.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zesco.net": {
+  "brand": "ZESCO",
+  "domain": "zesco.net",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zesco.xyz": {
+  "brand": "ZESCO",
+  "domain": "zesco.xyz",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "cheap ending .xyz",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zescopay.com": {
+  "brand": "ZESCO",
+  "domain": "zescopay.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zesco\" (ZESCO)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zm-momo.com": {
+  "brand": "MTN MoMo",
+  "domain": "zm-momo.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"momo\" (MTN MoMo)"
+  ],
+  "score": 50
+ },
+ "zra.app": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.app",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zra.co": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.co",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zra.com": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.com",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zra.info": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.info",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "cheap ending .info",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ },
+ "zra.net": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.net",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zra.org": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.org",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 55
+ },
+ "zra.xyz": {
+  "brand": "Zambia Revenue Authority",
+  "domain": "zra.xyz",
+  "found": "2026-11-16T13:17:58.571005+00:00",
+  "level": "medium",
+  "online": true,
+  "reasons": [
+   "uses the name \"zra\" (Zambia Revenue Authority)",
+   "cheap ending .xyz",
+   "not a .zm address, unlike the real one"
+  ],
+  "score": 65
+ }
+}
