@@ -413,10 +413,18 @@ def hunt(cfg, dry_run=False):
         f.update(found=now.isoformat(), online=True)
         new.append(f)
     new.sort(key=lambda f: -f["score"])
+    crt_down_first = False
     for i, f in enumerate(new[: cfg["max_certificate_lookups"]]):
         if i:
             time.sleep(cfg["seconds_between_searches"])  # be polite to crt.sh
-        f.update(certificate_info(f["domain"], cfg))
+        info = certificate_info(f["domain"], cfg)
+        if not info and i < 2:
+            crt_down = i == 1 or crt_down_first
+            crt_down_first = True
+            if crt_down:
+                log("crt.sh isn't answering right now - skipping certificate dates this run")
+                break
+        f.update(info)
         if f.get("logged") and now - parse_time(f["logged"]) <= timedelta(days=cfg["fresh_days"]):
             f["score"] = min(f["score"] + 10, 100)
             f["reasons"].append(f"set up in the last {cfg['fresh_days']} days")

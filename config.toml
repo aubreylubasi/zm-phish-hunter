@@ -20,10 +20,10 @@ dns_workers = 40
 fresh_days = 30
 
 # crt.sh (certificate lookups) is a free public service and is often slow: be patient and polite.
-search_timeout = 90
+search_timeout = 30
 search_retries = 2
 seconds_between_searches = 6
-max_certificate_lookups = 25
+max_certificate_lookups = 10
 
 # Real websites that use a brand's name but aren't scams (a football club, a supplier…).
 # Add a name here when the report keeps flagging something you have checked is genuine.
