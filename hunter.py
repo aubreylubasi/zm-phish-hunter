@@ -171,10 +171,11 @@ def score_domain(domain, cfg):
     chosen = name_part(domain)
     toks = tokens_of(chosen)
     score, reasons = 50, [f"uses the name \"{alias}\" ({brand['label']})"]
-    if kind == "lookalike":
-        score += 20
-        reasons.append("the name is misspelt or uses digits for letters")
     lures = sorted({w for w in cfg["lure_words"] if w in toks or (len(w) >= 5 and w in chosen)})
+    if kind == "lookalike":
+        # One letter off could also be an unrelated company, so on its own it only counts a little.
+        score += 20 if lures else 10
+        reasons.append("the name is one letter off, or uses digits for letters")
     if lures:
         score += 15
         reasons.append("lure words: " + ", ".join(lures))
@@ -209,7 +210,9 @@ def misspellings(name):
     """Common ways to fake a name: drop, double or swap a letter, or use a digit that looks like one."""
     out = set()
     for i in range(len(name)):
-        out.add(name[:i] + name[i + 1:])                      # zanco
+        if len(name) >= 8:
+            out.add(name[:i] + name[i + 1:])                  # dropping a letter of a short name gives
+                                                              # ordinary words (zanco, amtel), so long names only
         out.add(name[:i] + name[i] * 2 + name[i + 1:])        # zannaco
         if name[i] in SWAPS:
             out.add(name[:i] + SWAPS[name[i]] + name[i + 1:])  # zanac0

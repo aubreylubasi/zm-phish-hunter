@@ -20,7 +20,7 @@ already lost money. I wanted an early warning that watches for the fake site bei
 | Sign | Points |
 |---|---|
 | Uses a protected brand name on a site the brand doesn't own | 50 |
-| Misspelt name or digits for letters (`zanac0`, `zannaco`) | +20 |
+| One letter off or digits for letters (`zanac0`, `zannaco`) | +10, or +20 with a lure word |
 | Lure words (`login`, `verify`, `bonus`, `reversal`…) | +15 |
 | Cheap ending (`.top`, `.xyz`, `.shop`…) | +10 |
 | Free hosting (`web.app`, `pages.dev`…) | +10 |

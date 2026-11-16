@@ -12,7 +12,7 @@ cfg = hunter.load_config()
 level = lambda d: (hunter.score_domain(d, cfg) or {}).get("level")  # noqa: E731
 
 SHOULD_FLAG = {  # domain -> lowest level expected
-    "zanaco-login.top": "high", "zanac0.com": "high", "zannaco-online.com": "high",
+    "zanaco-login.top": "high", "zanac0.com": "medium", "zannaco-online.com": "high",
     "secure-zanaco.co.zm.verify-account.xyz": "high", "zesco-prepaid-bonus.shop": "high",
     "mtn-zm-momo-reward.online": "high", "airtelmoney-zambia.claim-bonus.live": "high",
     "zra-refund.info": "high", "zanaco.web.app": "medium", "zamtelkwacha.com": "medium",
@@ -42,7 +42,7 @@ for d in ["zanaco-login.top", "zanac0.com", "zannaco.com", "zesco-bonus.shop", "
     good = d in names
     ok &= good
     print(f"{'ok  ' if good else 'FAIL'} would try {d}")
-for d in ["zanaco.co.zm", "mtn.zm", "mtn-login.com"]:
+for d in ["zanaco.co.zm", "mtn.zm", "mtn-login.com", "zanco.com", "amtel.shop"]:
     good = d not in names
     ok &= good
     print(f"{'ok  ' if good else 'FAIL'} would not try {d}")
