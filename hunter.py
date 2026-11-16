@@ -387,6 +387,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="search and score, but save nothing")
     ap.add_argument("--check", action="store_true", help="test each certificate search")
     ap.add_argument("--score", nargs="+", metavar="DOMAIN", help="score these names and exit")
+    ap.add_argument("--probe", metavar="TERM", help="show the raw crt.sh answers for one term (for debugging)")
     ap.add_argument("--rows", help="read crt.sh rows from a JSON file instead of the internet (for testing)")
     args = ap.parse_args()
     cfg = load_config()
@@ -401,6 +402,20 @@ def main():
                 print(f"{d}: nothing suspicious (official, or no brand name in it)")
             else:
                 print(f"{d}: {f['score']}/100 ({f['level']}) - may imitate {f['brand']}: {'; '.join(f['reasons'])}")
+        return
+    if args.probe:
+        import requests
+        for q, extra in [(f"%{args.probe}%", {"exclude": "expired", "deduplicate": "Y"}), (f"%{args.probe}%", {}),
+                         (f"%.{args.probe}.co.zm", {}), (f"{args.probe}.co.zm", {})]:
+            try:
+                r = requests.get("https://crt.sh/", params={"q": q, "output": "json", **extra}, timeout=120,
+                                 headers={"User-Agent": USER_AGENT})
+                body = r.text.strip()
+                n = len(r.json()) if body.startswith("[") else "not JSON"
+                print(f"q={q} {extra}: HTTP {r.status_code}, {len(r.content)} bytes, rows={n}, starts {body[:80]!r}")
+            except Exception as e:  # noqa: BLE001
+                print(f"q={q} {extra}: {type(e).__name__}: {e}")
+            time.sleep(6)
         return
     if args.check:
         ok = True
