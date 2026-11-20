@@ -370,19 +370,31 @@ def write_report(new, history, failed, now):
     REPORT_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def send_telegram(findings):
-    token, chat = os.environ.get("TG_BOT_TOKEN"), os.environ.get("TG_CHAT_ID")
-    if not (token and chat and findings):
-        return
+def telegram(text):
+    """Send one message to the Telegram chat in TG_CHAT_ID. Returns (ok, reason)."""
+    token, chat = os.environ.get("TG_BOT_TOKEN", "").strip(), os.environ.get("TG_CHAT_ID", "").strip()
+    if not token or not chat:
+        return False, "TG_BOT_TOKEN or TG_CHAT_ID is not set"
     import requests
+    try:
+        r = requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                          json={"chat_id": chat, "text": text[:4000], "disable_web_page_preview": True}, timeout=20)
+        if r.ok:
+            return True, "sent"
+        return False, f"Telegram said: {r.json().get('description', r.status_code)}"
+    except Exception as e:  # noqa: BLE001 - an alert problem must not lose the findings
+        return False, type(e).__name__
+
+
+def send_telegram(findings):
+    if not findings:
+        return
     text = "🚨 ZM Phish Hunter: new suspicious domains\n\n" + "\n\n".join(
         f"{defang(f['domain'])}\nMay imitate: {f['brand']} | score {f['score']}\n{'; '.join(f['reasons'])}"
         for f in findings[:10])
-    try:
-        requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
-                      json={"chat_id": chat, "text": text[:4000], "disable_web_page_preview": True}, timeout=20)
-    except Exception as e:  # noqa: BLE001 - an alert problem must not lose the findings
-        log(f"   Telegram alert failed ({type(e).__name__})")
+    ok, why = telegram(text)
+    if not ok and os.environ.get("TG_BOT_TOKEN"):
+        log(f"   Telegram alert failed ({why})")
 
 
 # ───────────────────────────── main ─────────────────────────────
@@ -453,6 +465,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="search and score, but save nothing")
     ap.add_argument("--check", action="store_true", help="test DNS and the certificate lookup")
     ap.add_argument("--score", nargs="+", metavar="DOMAIN", help="score these names and exit")
+    ap.add_argument("--test-alert", action="store_true", help="send a test message to Telegram and exit")
     ap.add_argument("--candidates", metavar="BRAND", help="list the names it would try for a brand and exit")
     args = ap.parse_args()
     cfg = load_config()
@@ -468,6 +481,11 @@ def main():
             else:
                 print(f"{d}: {f['score']}/100 ({f['level']}) - may imitate {f['brand']}: {'; '.join(f['reasons'])}")
         return
+    if args.test_alert:
+        ok, why = telegram("✅ ZM Phish Hunter test: alerts work. You'll get a message here whenever "
+                           "it finds a new high-risk look-alike site.")
+        print(("✅ Test message sent to Telegram" if ok else f"❌ Test message not sent: {why}"))
+        sys.exit(0 if ok else 1)
     if args.candidates:
         for brand in cfg["brands"]:
             if args.candidates.lower() in brand["label"].lower():

@@ -59,8 +59,10 @@ Needs Python 3.11 or newer.
 2. Open **Actions**, enable workflows, then **ZM Phish Hunter → Run workflow → check**.
 3. Run it again with **hunt**. After that it runs by itself every 6 hours and saves the report.
 
-**Telegram alerts (optional):** create a bot with @BotFather, then add two repository secrets under
-**Settings → Secrets and variables → Actions**: `TG_BOT_TOKEN` and `TG_CHAT_ID`.
+**Telegram alerts (optional):** any Telegram bot you own can send them. Add two repository
+secrets under **Settings → Secrets and variables → Actions**: `TG_BOT_TOKEN` (from @BotFather) and
+`TG_CHAT_ID` (your Telegram user ID, which @userinfobot tells you). Then run the workflow with
+**test-alert** to check that a message arrives. Only new **high** findings are sent.
 
 ## Add a brand
 Copy a `[[brands]]` block in `config.toml` and fill in the label, the spellings to look for (main one first)

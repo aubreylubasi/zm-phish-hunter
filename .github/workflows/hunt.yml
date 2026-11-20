@@ -8,7 +8,7 @@ on:
       mode:
         description: "What to do"
         type: choice
-        options: [hunt, dry-run, check]
+        options: [hunt, dry-run, check, test-alert]
         default: hunt
 
 permissions:
@@ -38,10 +38,11 @@ jobs:
           case "${{ github.event.inputs.mode }}" in
             check)   python hunter.py --check ;;
             dry-run) python hunter.py --dry-run ;;
+            test-alert) python hunter.py --test-alert ;;
             *)       python hunter.py ;;
           esac
       - name: Save findings
-        if: github.event.inputs.mode != 'check' && github.event.inputs.mode != 'dry-run'
+        if: github.event.inputs.mode != 'check' && github.event.inputs.mode != 'dry-run' && github.event.inputs.mode != 'test-alert'
         run: |
           git config user.name "zm-phish-hunter"
           git config user.email "actions@users.noreply.github.com"
