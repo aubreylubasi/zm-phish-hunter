@@ -1,17 +1,23 @@
 # ZM Phish Hunter - latest findings
 
-*Last run: 21 November 2026, 13:04 UTC*
+*Last run: 21 November 2026, 18:56 UTC*
 
 Domains are written with `[.]` so they can't be clicked by accident. A finding is a **lead to check**, not proof of a scam.
 
-## New this run (0)
+## New this run (1)
 
-Nothing new.
+### zanaco[.]co
+- **May imitate:** Zanaco
+- **Score:** 55/100 (medium)
+- **Why:** uses the name "zanaco" (Zanaco); not a .zm address, unlike the real one
+- **First certificate:** none found / not looked up
+- **Status:** exists in DNS
 
 ## Last 50 findings
 
 | Found | Domain | May imitate | Score |
 |---|---|---|---|
+| 2026-11-21 | zanaco[.]co | Zanaco | 55 (medium) |
 | 2026-11-16 | zesco[.]online | ZESCO | 65 (medium) |
 | 2026-11-16 | airtelzambia[.]com | Airtel Money | 50 (medium) |
 | 2026-11-16 | boz-zm[.]org | Bank of Zambia | 55 (medium) |
