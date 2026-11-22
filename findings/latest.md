@@ -1,17 +1,12 @@
 # ZM Phish Hunter - latest findings
 
-*Last run: 21 November 2026, 18:56 UTC*
+*Last run: 22 November 2026, 01:17 UTC*
 
 Domains are written with `[.]` so they can't be clicked by accident. A finding is a **lead to check**, not proof of a scam.
 
-## New this run (1)
+## New this run (0)
 
-### zanaco[.]co
-- **May imitate:** Zanaco
-- **Score:** 55/100 (medium)
-- **Why:** uses the name "zanaco" (Zanaco); not a .zm address, unlike the real one
-- **First certificate:** none found / not looked up
-- **Status:** exists in DNS
+Nothing new.
 
 ## Last 50 findings
 
