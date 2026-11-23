@@ -1,6 +1,6 @@
 # ZM Phish Hunter - latest findings
 
-*Last run: 22 November 2026, 18:57 UTC*
+*Last run: 23 November 2026, 01:23 UTC*
 
 Domains are written with `[.]` so they can't be clicked by accident. A finding is a **lead to check**, not proof of a scam.
 
